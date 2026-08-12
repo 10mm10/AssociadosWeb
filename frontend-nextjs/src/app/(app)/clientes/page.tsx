@@ -693,7 +693,7 @@ export default function ClientesPage() {
         const errorData = await response.json();
         throw new Error(
           errorData.error ||
-            `Erro ao ${isEditing ? "atualizar" : "cadastrar"} o cliente.`,
+          `Erro ao ${isEditing ? "atualizar" : "cadastrar"} o cliente.`,
         );
       }
       // Ação de Sucesso: Usa o successToast
@@ -710,21 +710,21 @@ export default function ClientesPage() {
       if (method === "POST") {
         handleLimpar();
       } else {
-    setFile(null);
-    setFileName("");
+        setFile(null);
+        setFileName("");
 
-    if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-    }
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
 
-    const inputTelaCompacta = document.getElementById(
-        "pdf-upload-mobile"
-    ) as HTMLInputElement | null;
+        const inputTelaCompacta = document.getElementById(
+          "pdf-upload-mobile"
+        ) as HTMLInputElement | null;
 
-    if (inputTelaCompacta) {
-        inputTelaCompacta.value = "";
-    }
-}
+        if (inputTelaCompacta) {
+          inputTelaCompacta.value = "";
+        }
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err.message);
@@ -1173,10 +1173,10 @@ export default function ClientesPage() {
           const mesmoNome =
             tipoCliente === "fisica"
               ? (cliente.nome || "").trim().toLowerCase() ===
-                formData.nome.trim().toLowerCase()
+              formData.nome.trim().toLowerCase()
               : (cliente.razao_social || cliente.nome || "")
-                  .trim()
-                  .toLowerCase() === formData.nome.trim().toLowerCase();
+                .trim()
+                .toLowerCase() === formData.nome.trim().toLowerCase();
           return mesmoEmail && mesmoCelular && mesmoNome;
         });
         if (clienteCriado?.id) {
@@ -1264,79 +1264,104 @@ export default function ClientesPage() {
                     ====================================================== */}
               <div className="min-w-0">
                 {/* TIPO DE CLIENTE / ACESSO */}
-                <div className="mb-3 flex flex-wrap items-start gap-x-10 gap-y-2 border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-3">
-                    <label className="whitespace-nowrap text-xs font-semibold text-slate-600">
-                      Tipo de Cliente:
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <label
-                        htmlFor="pf"
-                        className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600"
-                      >
-                        <input
-                          type="radio"
-                          id="pf"
-                          name="tipoCliente"
-                          value="fisica"
-                          checked={tipoCliente === "fisica"}
-                          onChange={handleInputChange}
-                          className="h-3.5 w-3.5 accent-blue-600"
-                        />
-                        Pessoa Física
-                      </label>
-                      <label
-                        htmlFor="pj"
-                        className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600"
-                      >
-                        <input
-                          type="radio"
-                          id="pj"
-                          name="tipoCliente"
-                          value="juridica"
-                          checked={tipoCliente === "juridica"}
-                          onChange={handleInputChange}
-                          className="h-3.5 w-3.5 accent-blue-600"
-                        />
-                        Pessoa Jurídica
-                      </label>
+                <div className="mb-3 flex flex-wrap items-start gap-x-10 gap-y-2 border-b border-slate-200 pb-3">
+                  <div className="flex flex-wrap items-start gap-6">
+                    {/* TIPO DE CLIENTE */}
+                    <div>
+                      <p className="mb-2 text-xs font-semibold text-slate-600">
+                        Tipo de Cliente:
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <label
+                          htmlFor="pf"
+                          className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${tipoCliente === "fisica"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            id="pf"
+                            name="tipoCliente"
+                            value="fisica"
+                            checked={tipoCliente === "fisica"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+
+                          Pessoa Física
+                        </label>
+
+                        <label
+                          htmlFor="pj"
+                          className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${tipoCliente === "juridica"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            id="pj"
+                            name="tipoCliente"
+                            value="juridica"
+                            checked={tipoCliente === "juridica"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+
+                          Pessoa Jurídica
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <label className="whitespace-nowrap text-xs font-semibold text-slate-600">
-                      Tipo de Acesso:
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <label
-                        htmlFor="publico"
-                        className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600"
-                      >
-                        <input
-                          type="radio"
-                          id="publico"
-                          name="tipo_acesso"
-                          value="publico"
-                          checked={formData.tipo_acesso === "publico"}
-                          onChange={handleInputChange}
-                          className="h-3.5 w-3.5 accent-blue-600"
-                        />
-                        Público
-                      </label>
-                      <label
-                        htmlFor="privado"
-                        className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600"
-                      >
-                        <input
-                          type="radio"
-                          id="privado"
-                          name="tipo_acesso"
-                          value="privado"
-                          checked={formData.tipo_acesso === "privado"}
-                          onChange={handleInputChange}
-                          className="h-3.5 w-3.5 accent-blue-600"
-                        />
-                        Privado
-                      </label>
+
+                    {/* TIPO DE ACESSO */}
+                    <div>
+                      <p className="mb-2 text-xs font-semibold text-slate-600">
+                        Tipo de Acesso:
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <label
+                          htmlFor="publico"
+                          className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${formData.tipo_acesso === "publico"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                              : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            id="publico"
+                            name="tipo_acesso"
+                            value="publico"
+                            checked={formData.tipo_acesso === "publico"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+
+                          Público
+                        </label>
+
+                        <label
+                          htmlFor="privado"
+                          className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${formData.tipo_acesso === "privado"
+                              ? "border-slate-600 bg-slate-100 text-slate-800"
+                              : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            id="privado"
+                            name="tipo_acesso"
+                            value="privado"
+                            checked={formData.tipo_acesso === "privado"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+
+                          Privado
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1995,13 +2020,12 @@ export default function ClientesPage() {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className={`h-8 rounded border px-2.5 text-xs font-semibold outline-none ${
-                      formData.status === "EM ABERTO"
+                    className={`h-8 rounded border px-2.5 text-xs font-semibold outline-none ${formData.status === "EM ABERTO"
                         ? "border-green-300 bg-green-50 text-green-700"
                         : formData.status === "ENCERRADO"
                           ? "border-red-300 bg-red-50 text-red-700"
                           : "border-slate-300 bg-white text-slate-600"
-                    }`}
+                      }`}
                   >
                     <option value="" disabled>
                       STATUS
@@ -2059,12 +2083,12 @@ export default function ClientesPage() {
                     }}
                   >
                     {selectedPdfId &&
-                    pdfs
-                      .find((p) => p.id === selectedPdfId)
-                      ?.nome_arquivo.normalize("NFD")
-                      .replace(/[\u0300-\u036f]/g, "")
-                      .toLowerCase()
-                      .includes("procuracao")
+                      pdfs
+                        .find((p) => p.id === selectedPdfId)
+                        ?.nome_arquivo.normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLowerCase()
+                        .includes("procuracao")
                       ? "Enviar para Zapsign"
                       : "Gerar Link"}
                   </button>
@@ -2341,11 +2365,10 @@ export default function ClientesPage() {
                                   cliente.id ? cliente.id : `juridica-${index}`
                                 }
                                 onClick={() => handleClienteSelect(cliente)}
-                                className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${
-                                  selectedClienteId === cliente.id
+                                className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${selectedClienteId === cliente.id
                                     ? "bg-blue-100"
                                     : "bg-white"
-                                }`}
+                                  }`}
                               >
                                 <td className="h-8 px-2 text-slate-600">
                                   {cliente.id}
@@ -2390,11 +2413,10 @@ export default function ClientesPage() {
                                 key={pdf.id}
                                 onClick={() => handlePdfClick(pdf)}
                                 onDoubleClick={() => handlePdfDoubleClick(pdf)}
-                                className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${
-                                  selectedPdfId === pdf.id
+                                className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${selectedPdfId === pdf.id
                                     ? "bg-blue-100"
                                     : "bg-white"
-                                }`}
+                                  }`}
                               >
                                 <td className="h-8 max-w-[300px] px-2 text-slate-700">
                                   {editingPdfId === pdf.id ? (
