@@ -388,12 +388,10 @@ export default function ClientesPage() {
     const fetchLinkCadastroAtivo = async (clienteId: string) => {
         try {
             const token = localStorage.getItem("authToken");
-
             if (!token) {
                 setLinkGerado(null);
                 return;
             }
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/link-ativo/${clienteId}`,
                 {
@@ -403,20 +401,16 @@ export default function ClientesPage() {
                     },
                 }
             );
-
             if (!response.ok) {
                 setLinkGerado(null);
                 return;
             }
-
             const data = await response.json();
-
             if (data.ativo && data.link) {
                 setLinkGerado(data.link);
             } else {
                 setLinkGerado(null);
             }
-
         } catch (error) {
             console.error("Erro ao buscar link de cadastro ativo:", error);
             setLinkGerado(null);
@@ -444,11 +438,9 @@ export default function ClientesPage() {
         setSelectedClienteId(cliente.id);
         setIsEditing(true);
         setSelectedPdfId(null);
-
         if (cliente.id) {
             // Carrega os PDFs do cliente
             fetchPdfs(cliente.id);
-
             // Verifica se ainda existe um link de cadastro ativo
             fetchLinkCadastroAtivo(cliente.id);
         } else {
@@ -1134,13 +1126,11 @@ export default function ClientesPage() {
     };
     return (
         <div className="w-full min-w-0">
-
             {/* =====================================================
             MOBILE / TABLET - FLUXO COMPLETO
         ====================================================== */}
             <div className="w-full lg:hidden">
                 <div className="mx-auto w-full max-w-2xl space-y-3">
-
                     {/* CABEÇALHO */}
                     <section className="rounded-lg bg-white p-3 shadow-sm">
                         <div className="mb-3">
@@ -1148,25 +1138,20 @@ export default function ClientesPage() {
                                 Clientes
                             </h2>
                         </div>
-
                         {error && (
                             <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
                                 {error}
                             </p>
                         )}
-
                         {/* =================================================
                         1. CADASTRO RÁPIDO
                     ================================================== */}
                         <form onSubmit={handleMobileSubmit}>
-
-
                             {/* TIPO DO CLIENTE */}
                             <div className="mb-3">
                                 <p className="mb-2 text-xs font-semibold text-slate-600">
                                     Tipo de Cliente
                                 </p>
-
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <label
                                         className={`flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-[11px] font-semibold transition ${tipoCliente === "fisica"
@@ -1187,7 +1172,6 @@ export default function ClientesPage() {
                                         />
                                         Pessoa Física
                                     </label>
-
                                     <label
                                         className={`flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-[11px] font-semibold transition ${tipoCliente === "juridica"
                                             ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -1209,13 +1193,11 @@ export default function ClientesPage() {
                                     </label>
                                 </div>
                             </div>
-
                             {/* TIPO DE ACESSO */}
                             <div className="mb-3">
                                 <p className="mb-2 text-xs font-semibold text-slate-600">
                                     Tipo de Acesso
                                 </p>
-
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <label
                                         className={`flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-[11px] font-semibold transition ${formData.tipo_acesso === "publico"
@@ -1238,7 +1220,6 @@ export default function ClientesPage() {
                                         />
                                         Público
                                     </label>
-
                                     <label
                                         className={`flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-[11px] font-semibold transition ${formData.tipo_acesso === "privado"
                                             ? "border-slate-600 bg-slate-100 text-slate-800"
@@ -1262,7 +1243,6 @@ export default function ClientesPage() {
                                     </label>
                                 </div>
                             </div>
-
                             {/* NOME / RAZÃO SOCIAL */}
                             <div className="mb-3">
                                 <label
@@ -1273,7 +1253,6 @@ export default function ClientesPage() {
                                         ? "Nome Completo"
                                         : "Razão Social"}
                                 </label>
-
                                 <input
                                     id="nome-mobile"
                                     type="text"
@@ -1292,7 +1271,6 @@ export default function ClientesPage() {
                                     className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
-
                             {/* E-MAIL */}
                             <div className="mb-3">
                                 <label
@@ -1301,7 +1279,6 @@ export default function ClientesPage() {
                                 >
                                     E-mail
                                 </label>
-
                                 <input
                                     id="email-mobile"
                                     type="email"
@@ -1317,7 +1294,6 @@ export default function ClientesPage() {
                                     className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
-
                             {/* CELULAR */}
                             <div className="mb-4">
                                 <label
@@ -1326,7 +1302,6 @@ export default function ClientesPage() {
                                 >
                                     Celular
                                 </label>
-
                                 <IMaskInput
                                     mask={celularMask}
                                     id="celular-mobile"
@@ -1342,7 +1317,6 @@ export default function ClientesPage() {
                                     className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
-
                             {/* BOTÕES */}
                             <div className="grid grid-cols-2 gap-1.5">
                                 <button
@@ -1353,7 +1327,6 @@ export default function ClientesPage() {
                                 >
                                     Limpar
                                 </button>
-
                                 <button
                                     type="submit"
                                     disabled={isMobileSaving}
@@ -1366,7 +1339,6 @@ export default function ClientesPage() {
                             </div>
                         </form>
                     </section>
-
                     {/* =================================================
                     2. CLIENTES CADASTRADOS
                 ================================================== */}
@@ -1379,7 +1351,6 @@ export default function ClientesPage() {
                                 Selecione um cliente para continuar o atendimento.
                             </p>
                         </div>
-
                         <input
                             type="text"
                             id="client-search-input-mobile"
@@ -1388,7 +1359,6 @@ export default function ClientesPage() {
                             value={searchTerm}
                             onChange={handleSearch}
                         />
-
                         <div className="max-h-[300px] space-y-1.5 overflow-y-auto pr-0.5">
                             {isLoading ? (
                                 <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
@@ -1418,12 +1388,10 @@ export default function ClientesPage() {
                                                 <p className="truncate text-xs font-semibold text-slate-700">
                                                     {cliente.nome}
                                                 </p>
-
                                                 <p className="mt-0.5 text-[11px] text-slate-500">
                                                     {cliente.celular || "Celular não informado"}
                                                 </p>
                                             </div>
-
                                             <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500">
                                                 ID {cliente.id}
                                             </span>
@@ -1437,7 +1405,6 @@ export default function ClientesPage() {
                             )}
                         </div>
                     </section>
-
                     {/* =================================================
                     3. AÇÕES DO CLIENTE SELECIONADO
                 ================================================== */}
@@ -1463,27 +1430,22 @@ export default function ClientesPage() {
                                         Link de Cadastro
                                     </span>
                                 </button>
-
                                 <button
                                     type="button"
                                     onClick={async () => {
                                         setSelectedLinkType("procuracao");
                                         setProcuracaoSelecionada("");
-
                                         try {
                                             const token = localStorage.getItem("authToken");
-
                                             if (!token) {
                                                 console.error(
                                                     "Token não encontrado no localStorage"
                                                 );
                                                 return;
                                             }
-
                                             const cleanToken = token
                                                 .replace(/['"]+/g, "")
                                                 .trim();
-
                                             const response = await fetch(
                                                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/documentos/procuracao`,
                                                 {
@@ -1494,20 +1456,15 @@ export default function ClientesPage() {
                                                     },
                                                 }
                                             );
-
                                             if (!response.ok) {
                                                 const errorData = await response.json();
-
                                                 console.error(
                                                     "Erro retornado pelo backend:",
                                                     errorData
                                                 );
-
                                                 throw new Error(`Erro ${response.status}`);
                                             }
-
                                             const data = await response.json();
-
                                             setProcuracaoList(data);
                                             setShowProcuracaoList(true);
                                             setShowLinkOptions(true);
@@ -1516,7 +1473,6 @@ export default function ClientesPage() {
                                                 "Erro ao carregar procurações:",
                                                 error
                                             );
-
                                             alert(
                                                 "Erro ao carregar documentos de procuração."
                                             );
@@ -1529,14 +1485,12 @@ export default function ClientesPage() {
                                     </span>
                                 </button>
                             </div>
-
                             {/* LINK DE CADASTRO */}
                             {linkGerado && (
                                 <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3">
                                     <p className="text-xs font-semibold text-blue-700">
                                         Link de Cadastro
                                     </p>
-
                                     <a
                                         href={linkGerado}
                                         target="_blank"
@@ -1545,7 +1499,6 @@ export default function ClientesPage() {
                                     >
                                         {linkGerado}
                                     </a>
-
                                     <button
                                         type="button"
                                         onClick={handleCopyLink}
@@ -1553,7 +1506,6 @@ export default function ClientesPage() {
                                     >
                                         Copiar Link de Cadastro
                                     </button>
-
                                     <input
                                         type="text"
                                         ref={linkRef}
@@ -1562,14 +1514,12 @@ export default function ClientesPage() {
                                     />
                                 </div>
                             )}
-
                             {/* LINK DA PROCURAÇÃO / ASSINATURA */}
                             {linkProcuracao && (
                                 <div className="mt-3 rounded-xl border border-purple-200 bg-purple-50 p-3">
                                     <p className="text-xs font-semibold text-purple-700">
                                         Link da Assinatura
                                     </p>
-
                                     <a
                                         href={linkProcuracao}
                                         target="_blank"
@@ -1578,7 +1528,6 @@ export default function ClientesPage() {
                                     >
                                         {linkProcuracao}
                                     </a>
-
                                     <button
                                         type="button"
                                         onClick={handleCopyProcuracaoLink}
@@ -1590,7 +1539,6 @@ export default function ClientesPage() {
                             )}
                         </section>
                     )}
-
                     {/* =================================================
                     4. ARQUIVOS / PROCURAÇÃO / ZAPSIGN
                 ================================================== */}
@@ -1600,7 +1548,6 @@ export default function ClientesPage() {
                                 <h3 className="text-sm font-semibold text-slate-700">
                                     Arquivos do Cliente
                                 </h3>
-
                                 <label
                                     htmlFor="pdf-upload-mobile"
                                     className=" py-2 rounded bg-slate-500 px-3 text-xs font-semibold text-white transition "
@@ -1615,7 +1562,6 @@ export default function ClientesPage() {
                                     Atualizar
                                 </button>
                             </div>
-
                             {/* INPUT ESCONDIDO */}
                             <input
                                 id="pdf-upload-mobile"
@@ -1624,7 +1570,6 @@ export default function ClientesPage() {
                                 onChange={handleFileChange}
                                 className="hidden"
                             />
-
                             <div className="space-y-2">
                                 {pdfs.length > 0 ? (
                                     pdfs.map((pdf) => {
@@ -1632,10 +1577,8 @@ export default function ClientesPage() {
                                             .normalize("NFD")
                                             .replace(/[\u0300-\u036f]/g, "")
                                             .toLowerCase();
-
                                         const isProcuracao =
                                             nomeNormalizado.includes("procuracao");
-
                                         return (
                                             <div
                                                 key={pdf.id}
@@ -1650,13 +1593,11 @@ export default function ClientesPage() {
                                                         <p className="break-words text-xs font-semibold text-slate-700">
                                                             {pdf.nome_arquivo}
                                                         </p>
-
                                                         <p className="mt-0.5 text-[11px] text-slate-500">
                                                             {formatarData(pdf.data)}
                                                         </p>
                                                     </div>
                                                 </div>
-
                                                 <div className="mt-2 grid grid-cols-2 gap-1.5">
                                                     <a
                                                         href={pdf.url}
@@ -1669,14 +1610,12 @@ export default function ClientesPage() {
                                                     >
                                                         Abrir Arquivo
                                                     </a>
-
                                                     {isProcuracao && (
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.preventDefault();
                                                                 e.stopPropagation();
-
                                                                 handleEnviarParaZapsign(
                                                                     pdf.id,
                                                                     pdf.nome_arquivo
@@ -1699,7 +1638,6 @@ export default function ClientesPage() {
                             </div>
                         </section>
                     )}
-
                     {/* =================================================
                     MODAL MOBILE - LINK / PROCURAÇÃO
                 ================================================== */}
@@ -1712,14 +1650,12 @@ export default function ClientesPage() {
                                             ? "Escolha a procuração"
                                             : "Gerar link de cadastro"}
                                     </h4>
-
                                     <p className="mt-0.5 text-[11px] text-slate-500">
                                         {selectedLinkType === "procuracao"
                                             ? "Selecione o modelo que será gerado para este cliente."
                                             : "Confirme para gerar um novo link de cadastro."}
                                     </p>
                                 </div>
-
                                 {selectedLinkType === "procuracao" ? (
                                     <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
                                         {procuracaoList.length > 0 ? (
@@ -1753,7 +1689,6 @@ export default function ClientesPage() {
                                                             }
                                                             className="h-4 w-4 accent-purple-600"
                                                         />
-
                                                         <span className="break-words">
                                                             {procuracao?.nome_original
                                                                 ?.replace(
@@ -1786,7 +1721,6 @@ export default function ClientesPage() {
                                         </p>
                                     </div>
                                 )}
-
                                 <div className="mt-5 grid grid-cols-2 gap-2">
                                     <button
                                         type="button"
@@ -1798,7 +1732,6 @@ export default function ClientesPage() {
                                     >
                                         Cancelar
                                     </button>
-
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -1811,7 +1744,6 @@ export default function ClientesPage() {
                                                     selectedLinkType,
                                                     procuracaoSelecionada
                                                 );
-
                                                 setShowLinkOptions(false);
                                                 setShowProcuracaoList(false);
                                             } else {
@@ -1832,8 +1764,6 @@ export default function ClientesPage() {
                     )}
                 </div>
             </div>
-
-
             <div className="hidden w-full min-w-0 lg:block">
                 <div className="w-full min-w-0 rounded-lg bg-white p-4 shadow-sm">
                     <h2 className="mb-3 text-xl font-semibold text-slate-600">
