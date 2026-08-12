@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "817529156131",
+    "project_id": "associadosweb-app",
+    "storage_bucket": "associadosweb-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817529156131:android:e5db7c99bbb3722b1db796",
+        "android_client_info": {
+          "package_name": "com.seuprojeto.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuZY3P5VTsomlEmJ75v8OvjesB4w_0n7c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
