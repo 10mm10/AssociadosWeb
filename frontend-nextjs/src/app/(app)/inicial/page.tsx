@@ -29,7 +29,7 @@ export default function LandingPage() {
 
                     <p className="mt-3 max-w-lg px-1 text-xs leading-5 text-slate-500 sm:mt-4 sm:text-sm sm:leading-6 md:text-base">
                         Bem-vindo ao sistema de gestão da Assessoria Interagir.
-                        Utilize o menu lateral para acessar as funcionalidades disponíveis.
+                        Utilize o menu para acessar as funcionalidades disponíveis.
                     </p>
 
                     <div className="mt-5 h-px w-20 bg-slate-300 sm:mt-7 sm:w-24" />
