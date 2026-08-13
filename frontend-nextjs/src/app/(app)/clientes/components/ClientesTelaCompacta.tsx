@@ -135,11 +135,11 @@ export default function ClientesTelaCompacta<
 
   const isProcuracaoSelecionada = Boolean(
     pdfSelecionado &&
-      pdfSelecionado.nome_arquivo
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .includes("procuracao"),
+    pdfSelecionado.nome_arquivo
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .includes("procuracao"),
   );
 
   return (

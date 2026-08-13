@@ -336,12 +336,7 @@ function iniciarCronJobs(s3Client) {
         }
     );
 
-    console.log(
-        "⏰ Cron de faxina configurada para 22:00 - America/Sao_Paulo."
-    );
 }
-
-
 module.exports = {
     iniciarCronJobs
 };

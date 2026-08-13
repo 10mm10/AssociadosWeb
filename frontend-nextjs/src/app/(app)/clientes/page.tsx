@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IMaskInput } from "react-imask";
 import axios from "axios";
 import useAlerts from "@/hooks/useAlerts"; // <-- Import mantido
@@ -104,10 +104,7 @@ interface Pdf {
   url: string;
   cliente_id: string;
 }
-interface Procuracao {
-  id: number;
-  nome_original: string;
-}
+
 // Atualize ou crie este tipo
 interface GerarProcuracaoResponse {
   message: string;
@@ -183,12 +180,8 @@ export default function ClientesPage() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedClienteId, setSelectedClienteId] = useState<string | null>(
-    null,
-  );
-  const [selectedClienteKey, setSelectedClienteKey] = useState<string | null>(
-    null,
-  );
+  const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null,);
+
   const [selectedPdfId, setSelectedPdfId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [originalClientes, setOriginalClientes] = useState<Cliente[]>([]);
@@ -208,9 +201,6 @@ export default function ClientesPage() {
   >([]);
   const [selectedLinkType, setSelectedLinkType] = useState("cadastro");
   const [showLinkOptions, setShowLinkOptions] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<
-    "cadastro" | "procuracao" | null
-  >(null);
   const [procuracaoSelecionada, setProcuracaoSelecionada] = useState<
     string | null
   >(null);
@@ -251,16 +241,9 @@ export default function ClientesPage() {
     { value: "SE", label: "Sergipe" },
     { value: "TO", label: "Tocantins" },
   ];
-  // Dentro do seu componente, antes do "return (...)":
-  const pdfSelecionado = pdfs.find((p) => p.id === selectedPdfId);
+
+
   // Lógica de verificação mais robusta
-  const isProcuracaoSelecionada =
-    pdfSelecionado &&
-    pdfSelecionado.nome_arquivo
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .includes("procuracao");
   const cpfMask = "000.000.000-00";
   const cnpjMask = "00.000.000/0000-00";
   const cepMask = "00000-000";
@@ -480,7 +463,6 @@ export default function ClientesPage() {
   const handlePdfSelect = (pdfId: string) => {
     setSelectedPdfId(pdfId);
   };
-  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const handlePdfDoubleClick = (pdf: Pdf) => {
     let urlParaAbrir = pdf.url;
     if (urlParaAbrir) {
@@ -836,7 +818,6 @@ export default function ClientesPage() {
     setPdfs([]);
     setError(null);
     setSelectedClienteId(null);
-    setSelectedClienteKey(null);
     setSelectedPdfId(null);
     setSearchTerm("");
     setLinkGerado(null); // Limpa o link gerado
