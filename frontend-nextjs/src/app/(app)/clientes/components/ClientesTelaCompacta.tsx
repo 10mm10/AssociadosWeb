@@ -479,6 +479,48 @@ export default function ClientesTelaCompacta<
                   Criar Procuração
                 </span>
               </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setSelectedLinkType("declaracao");
+                  setProcuracaoSelecionada("");
+                  try {
+                    const token = localStorage.getItem("authToken");
+                    if (!token) {
+                      console.error("Token não encontrado no localStorage");
+                      return;
+                    }
+                    const cleanToken = token.replace(/['"]+/g, "").trim();
+                    const response = await fetch(
+                      `${process.env.NEXT_PUBLIC_BACKEND_URL}/documentos/declaracao`,
+                      {
+                        method: "GET",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${cleanToken}`,
+                        },
+                      },
+                    );
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      console.error("Erro retornado pelo backend:", errorData);
+                      throw new Error(`Erro ${response.status}`);
+                    }
+                    const data = await response.json();
+                    setProcuracaoList(data);
+                    setShowProcuracaoList(true);
+                    setShowLinkOptions(true);
+                  } catch (error) {
+                    console.error("Erro ao carregar declarações:", error);
+                    alert("Erro ao carregar documentos de declaração.");
+                  }
+                }}
+                className="col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-center transition active:scale-[0.99]"
+              >
+                <span className="block text-xs font-semibold text-emerald-700">
+                  Criar Declaração de Hipossuficiência
+                </span>
+              </button>
             </div>
             {/* LINK DE CADASTRO */}
             {linkGerado && (
@@ -661,7 +703,7 @@ export default function ClientesTelaCompacta<
           </section>
         )}
         {/* =================================================
-        MODAL MOBILE - LINK / PROCURAÇÃO
+        MODAL MOBILE - LINK / PROCURAÇÃO / DECLARAÇÃO
         ================================================== */}
         {showLinkOptions && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
@@ -670,15 +712,19 @@ export default function ClientesTelaCompacta<
                 <h4 className="text-sm font-semibold text-slate-800">
                   {selectedLinkType === "procuracao"
                     ? "Escolha a procuração"
-                    : "Gerar link de cadastro"}
+                    : selectedLinkType === "declaracao"
+                      ? "Escolha a declaração"
+                      : "Gerar link de cadastro"}
                 </h4>
                 <p className="mt-0.5 text-[11px] text-slate-500">
                   {selectedLinkType === "procuracao"
                     ? "Selecione o modelo que será gerado para este cliente."
-                    : "Confirme para gerar um novo link de cadastro."}
+                    : selectedLinkType === "declaracao"
+                      ? "Selecione o modelo de declaração de hipossuficiência."
+                      : "Confirme para gerar um novo link de cadastro."}
                 </p>
               </div>
-              {selectedLinkType === "procuracao" ? (
+              {selectedLinkType !== "cadastro" ? (
                 <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
                   {procuracaoList.length > 0 ? (
                     procuracaoList.map(
@@ -693,7 +739,7 @@ export default function ClientesTelaCompacta<
                         >
                           <input
                             type="radio"
-                            name="procuracao_type_mobile"
+                            name={`${selectedLinkType}_type_mobile`}
                             value={procuracao.nome_original}
                             checked={
                               procuracaoSelecionada === procuracao.nome_original
@@ -705,7 +751,8 @@ export default function ClientesTelaCompacta<
                           />
                           <span className="break-words">
                             {procuracao?.nome_original
-                              ?.replace("procuracao_", "")
+                              ?.replace(/^procuracao_/i, "")
+                              .replace(/^declaracao_/i, "")
                               .replace(".pdf", "")
                               .replace(".html", "")}
                           </span>
@@ -714,7 +761,9 @@ export default function ClientesTelaCompacta<
                     )
                   ) : (
                     <p className="rounded-lg bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
-                      Nenhum documento de procuração encontrado.
+                      Nenhum documento de {selectedLinkType === "declaracao"
+                        ? "declaração"
+                        : "procuração"} encontrado.
                     </p>
                   )}
                 </div>
@@ -742,21 +791,30 @@ export default function ClientesTelaCompacta<
                   onClick={() => {
                     if (
                       selectedLinkType === "cadastro" ||
-                      (selectedLinkType === "procuracao" &&
+                      ((selectedLinkType === "procuracao" ||
+                        selectedLinkType === "declaracao") &&
                         procuracaoSelecionada)
                     ) {
                       handleGerarLink(selectedLinkType, procuracaoSelecionada);
                       setShowLinkOptions(false);
                       setShowProcuracaoList(false);
                     } else {
-                      alert("Selecione uma procuração para continuar.");
+                      alert(
+                        `Selecione uma ${
+                          selectedLinkType === "declaracao"
+                            ? "declaração"
+                            : "procuração"
+                        } para continuar.`,
+                      );
                     }
                   }}
                   className="h-11 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white"
                 >
                   {selectedLinkType === "procuracao"
                     ? "Gerar Procuração"
-                    : "Gerar Link"}
+                    : selectedLinkType === "declaracao"
+                      ? "Gerar Declaração"
+                      : "Gerar Link"}
                 </button>
               </div>
             </div>

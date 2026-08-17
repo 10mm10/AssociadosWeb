@@ -886,6 +886,33 @@ export default function ClientesPage() {
         if (selectedClienteId) {
           fetchPdfs(selectedClienteId);
         }
+        // --- Lógica para a DECLARAÇÃO DE HIPOSSUFICIÊNCIA ---
+      } else if (tipo === "declaracao") {
+        if (!procuracaoNome) {
+          errorAlert("Selecione um tipo de declaração.", "Aviso");
+          return;
+        }
+
+        const response = await axios.post<GerarProcuracaoResponse>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gerar-declaracao-hipossuficiencia`,
+          {
+            clienteId: selectedClienteId,
+            documentoNome: procuracaoNome,
+          },
+        );
+
+        if (response.data.link) {
+          successToast(
+            "Declaração de hipossuficiência gerada com sucesso! \n\n" +
+            response.data.link,
+          );
+        } else {
+          errorAlert(
+            response.data.message || "Link não retornado pelo servidor.",
+          );
+        }
+
+        fetchPdfs(selectedClienteId);
         // --- Lógica para o link de CADASTRO (CORRIGIDA) ---
       } else if (tipo === "cadastro") {
         const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/gerar-link`;
@@ -1180,9 +1207,6 @@ export default function ClientesPage() {
   };
   return (
     <div className="w-full min-w-0">
-      {/* =====================================================
-            MOBILE / TABLET - FLUXO COMPLETO
-        ====================================================== */}
       <ClientesTelaCompacta
         error={error}
         tipoCliente={tipoCliente}
@@ -1257,8 +1281,8 @@ export default function ClientesPage() {
                         <label
                           htmlFor="pf"
                           className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${tipoCliente === "fisica"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-slate-200 bg-white text-slate-600"
+                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            : "border-slate-200 bg-white text-slate-600"
                             }`}
                         >
                           <input
@@ -1277,8 +1301,8 @@ export default function ClientesPage() {
                         <label
                           htmlFor="pj"
                           className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${tipoCliente === "juridica"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-slate-200 bg-white text-slate-600"
+                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            : "border-slate-200 bg-white text-slate-600"
                             }`}
                         >
                           <input
@@ -1306,8 +1330,8 @@ export default function ClientesPage() {
                         <label
                           htmlFor="publico"
                           className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${formData.tipo_acesso === "publico"
-                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                              : "border-slate-200 bg-white text-slate-600"
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                            : "border-slate-200 bg-white text-slate-600"
                             }`}
                         >
                           <input
@@ -1326,8 +1350,8 @@ export default function ClientesPage() {
                         <label
                           htmlFor="privado"
                           className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold transition ${formData.tipo_acesso === "privado"
-                              ? "border-slate-600 bg-slate-100 text-slate-800"
-                              : "border-slate-200 bg-white text-slate-600"
+                            ? "border-slate-600 bg-slate-100 text-slate-800"
+                            : "border-slate-200 bg-white text-slate-600"
                             }`}
                         >
                           <input
@@ -2002,10 +2026,10 @@ export default function ClientesPage() {
                     value={formData.status}
                     onChange={handleInputChange}
                     className={`h-8 rounded border px-2.5 text-xs font-semibold outline-none ${formData.status === "EM ABERTO"
-                        ? "border-green-300 bg-green-50 text-green-700"
-                        : formData.status === "ENCERRADO"
-                          ? "border-red-300 bg-red-50 text-red-700"
-                          : "border-slate-300 bg-white text-slate-600"
+                      ? "border-green-300 bg-green-50 text-green-700"
+                      : formData.status === "ENCERRADO"
+                        ? "border-red-300 bg-red-50 text-red-700"
+                        : "border-slate-300 bg-white text-slate-600"
                       }`}
                   >
                     <option value="" disabled>
@@ -2059,6 +2083,9 @@ export default function ClientesPage() {
                           pdfSelecionado.nome_arquivo,
                         );
                       } else {
+                        setSelectedLinkType("cadastro");
+                        setProcuracaoSelecionada("");
+                        setShowProcuracaoList(false);
                         setShowLinkOptions(true);
                       }
                     }}
@@ -2097,7 +2124,7 @@ export default function ClientesPage() {
                                 >
                                   <input
                                     type="radio"
-                                    name="procuracao_type"
+                                    name={`${selectedLinkType}_type`}
                                     value={procuracao.nome_original}
                                     checked={
                                       procuracaoSelecionada ===
@@ -2109,14 +2136,21 @@ export default function ClientesPage() {
                                     className="h-3.5 w-3.5 accent-blue-600"
                                   />
                                   {procuracao?.nome_original
-                                    ?.replace("procuracao_", "")
-                                    .replace(".pdf", "")}
+                                    ?.replace(/\.(pdf|html)$/i, "")
+                                    .replace(/^procuracao_/i, "")
+                                    .replace(/^declaracao_de_/i, "Declaração de ")
+                                    .replace(/_/g, " ")
+                                    .replace(/hipossuficiencia/gi, "Hipossuficiência")
+                                    .replace(/\bpf\b/gi, "PF")}
                                 </label>
                               ),
                             )
                           ) : (
                             <p className="py-3 text-xs text-slate-500">
-                              Nenhum documento de procuração encontrado.
+                              Nenhum documento de {selectedLinkType ===
+                                "declaracao"
+                                ? "declaração"
+                                : "procuração"} encontrado.
                             </p>
                           )}
                         </div>
@@ -2145,6 +2179,7 @@ export default function ClientesPage() {
                               checked={selectedLinkType === "procuracao"}
                               onChange={async () => {
                                 setSelectedLinkType("procuracao");
+                                setProcuracaoSelecionada("");
                                 try {
                                   const token =
                                     localStorage.getItem("authToken");
@@ -2192,6 +2227,64 @@ export default function ClientesPage() {
                             />
                             Criar Procuração
                           </label>
+                          <label
+                            key="declaracao"
+                            className="flex cursor-pointer items-center gap-2 rounded border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50"
+                          >
+                            <input
+                              type="radio"
+                              value="declaracao"
+                              checked={selectedLinkType === "declaracao"}
+                              onChange={async () => {
+                                setSelectedLinkType("declaracao");
+                                setProcuracaoSelecionada("");
+                                try {
+                                  const token =
+                                    localStorage.getItem("authToken");
+                                  if (!token) {
+                                    console.error(
+                                      "Token não encontrado no localStorage",
+                                    );
+                                    return;
+                                  }
+                                  const cleanToken = token
+                                    .replace(/['"]+/g, "")
+                                    .trim();
+                                  const response = await fetch(
+                                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/documentos/declaracao`,
+                                    {
+                                      method: "GET",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${cleanToken}`,
+                                      },
+                                    },
+                                  );
+                                  if (!response.ok) {
+                                    const errorData = await response.json();
+                                    console.error(
+                                      "Erro retornado pelo backend:",
+                                      errorData,
+                                    );
+                                    throw new Error(`Erro ${response.status}`);
+                                  }
+                                  const data = await response.json();
+                                  setProcuracaoList(data);
+                                  setShowProcuracaoList(true);
+                                } catch (error) {
+                                  console.error(
+                                    "Erro ao carregar declarações:",
+                                    error,
+                                  );
+                                  alert(
+                                    "Erro ao carregar documentos de declaração.",
+                                  );
+                                }
+                              }}
+                              className="h-3.5 w-3.5 accent-blue-600"
+                            />
+                            Criar Declaração de Hipossuficiência
+                          </label>
                         </div>
                       )}
                       <div className="mt-5 flex justify-end gap-2">
@@ -2200,7 +2293,8 @@ export default function ClientesPage() {
                           onClick={() => {
                             if (
                               selectedLinkType === "cadastro" ||
-                              (selectedLinkType === "procuracao" &&
+                              ((selectedLinkType === "procuracao" ||
+                                selectedLinkType === "declaracao") &&
                                 procuracaoSelecionada)
                             ) {
                               handleGerarLink(
@@ -2209,7 +2303,12 @@ export default function ClientesPage() {
                               );
                               setShowLinkOptions(false);
                             } else {
-                              alert("Selecione uma procuração para continuar.");
+                              alert(
+                                `Selecione uma ${selectedLinkType === "declaracao"
+                                  ? "declaração"
+                                  : "procuração"
+                                } para continuar.`,
+                              );
                             }
                           }}
                           className="h-8 rounded bg-blue-600 px-4 text-xs font-semibold text-white hover:bg-blue-700"
@@ -2347,8 +2446,8 @@ export default function ClientesPage() {
                                 }
                                 onClick={() => handleClienteSelect(cliente)}
                                 className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${selectedClienteId === cliente.id
-                                    ? "bg-blue-100"
-                                    : "bg-white"
+                                  ? "bg-blue-100"
+                                  : "bg-white"
                                   }`}
                               >
                                 <td className="h-8 px-2 text-slate-600">
@@ -2395,8 +2494,8 @@ export default function ClientesPage() {
                                 onClick={() => handlePdfClick(pdf)}
                                 onDoubleClick={() => handlePdfDoubleClick(pdf)}
                                 className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-blue-50 ${selectedPdfId === pdf.id
-                                    ? "bg-blue-100"
-                                    : "bg-white"
+                                  ? "bg-blue-100"
+                                  : "bg-white"
                                   }`}
                               >
                                 <td className="h-8 max-w-[300px] px-2 text-slate-700">

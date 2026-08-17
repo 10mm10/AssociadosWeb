@@ -249,6 +249,148 @@ const gerarProcuracao = async (req, res) => {
   }
 };
 
+// Gerar Declaração de Hipossuficiência em PDF
+const gerarDeclaracaoHipossuficiencia = async (req, res) => {
+  try {
+    const { clienteId, documentoNome } = req.body;
+
+    if (!clienteId || !documentoNome) {
+      return res.status(400).json({
+        error: "ID do cliente e nome do documento são obrigatórios."
+      });
+    }
+
+    const clienteData = await fetchClienteData(clienteId);
+    if (!clienteData) {
+      return res.status(404).json({ error: "Cliente não encontrado." });
+    }
+
+    if (clienteData.tipo !== "fisica") {
+      return res.status(400).json({
+        error: "A declaração de hipossuficiência está disponível apenas para pessoa física."
+      });
+    }
+
+    const [rows] = await pool.execute(
+      "SELECT caminho_arquivo FROM documentos_corporativos WHERE nome_original = ? LIMIT 1",
+      [documentoNome]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Modelo de declaração não encontrado no banco." });
+    }
+
+    const caminhoModelo = rows[0].caminho_arquivo;
+    let htmlTemplate;
+
+    if (caminhoModelo.startsWith("http")) {
+      const key = decodeURIComponent(caminhoModelo.split(".amazonaws.com/")[1]);
+      const command = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: key,
+      });
+      const response = await s3Client.send(command);
+      const chunks = [];
+
+      for await (const chunk of response.Body) {
+        chunks.push(chunk);
+      }
+
+      htmlTemplate = Buffer.concat(chunks).toString("utf-8");
+    } else {
+      const htmlPath = path.join(__dirname, "..", "uploads", caminhoModelo);
+      htmlTemplate = await fsp.readFile(htmlPath, "utf-8");
+    }
+
+    const htmlPreenchido = preencherTemplateHtml(htmlTemplate, clienteData);
+    const browser = await puppeteer.launch({
+      executablePath: os.platform() === "linux" ? "/usr/bin/chromium" : undefined,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+    });
+
+    let pdfBytes;
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1200, height: 800 });
+      await page.setContent(htmlPreenchido, { waitUntil: "domcontentloaded" });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      pdfBytes = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        preferCSSPageSize: true,
+        margin: {
+          top: "2.5cm",
+          bottom: "2.5cm",
+          left: "3cm",
+          right: "2cm",
+        },
+      });
+    } finally {
+      await browser.close();
+    }
+
+    const bucketName = process.env.AWS_BUCKET_NAME;
+    const nomeDoCliente = (clienteData.nome || "cliente").trim();
+    const nomeLimpoParaUrl = nomeDoCliente
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9\s-_]/g, "")
+      .replace(/\s+/g, "_");
+    const templateLimpoParaUrl = documentoNome
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9\s-_]/g, "")
+      .replace(/\s+/g, "_");
+    const agora = new Date();
+    const timestampSeguro =
+      agora.getFullYear() +
+      String(agora.getMonth() + 1).padStart(2, "0") +
+      String(agora.getDate()).padStart(2, "0") +
+      "_" +
+      String(agora.getHours()).padStart(2, "0") +
+      String(agora.getMinutes()).padStart(2, "0") +
+      String(agora.getSeconds()).padStart(2, "0");
+    const nomeArquivoGerado =
+      `Declaracao_Hipossuficiencia_${templateLimpoParaUrl}_${nomeLimpoParaUrl}_${timestampSeguro}.pdf`;
+    const fullKey = gerarCaminhoS3("declaracoes_clientes", nomeArquivoGerado);
+
+    await s3Client.send(new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fullKey,
+      Body: pdfBytes,
+      ContentType: "application/pdf",
+    }));
+
+    const s3UrlGerada =
+      `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fullKey}`;
+
+    await pool.execute(
+      "INSERT INTO pdfs_unificados (cliente_id, nome_arquivo, caminho_arquivo, data_upload, zapsign_id) VALUES (?, ?, ?, ?, NULL)",
+      [
+        clienteId,
+        `Declaração de Hipossuficiência - ${clienteData.nome}`,
+        s3UrlGerada,
+        new Date(),
+      ]
+    );
+
+    return res.status(200).json({
+      message: "Declaração de hipossuficiência gerada com sucesso!",
+      link: s3UrlGerada,
+    });
+  } catch (error) {
+    console.error("Erro ao gerar declaração de hipossuficiência:", error);
+    return res.status(500).json({
+      error: "Erro ao gerar a declaração de hipossuficiência: " + error.message,
+    });
+  }
+};
+
 // 2. Listar Procurações Corporativas
 const listarProcuracoes = async (req, res) => {
   try {
@@ -256,9 +398,9 @@ const listarProcuracoes = async (req, res) => {
     const accessFilterValue = req.accessFilterValue !== undefined ? req.accessFilterValue : null;
 
     const sql = `
-      SELECT id, nome_original, caminho_arquivo 
-      FROM documentos_corporativos 
-      WHERE nome_original LIKE '%procuracao%' 
+      SELECT id, nome_original, caminho_arquivo
+      FROM documentos_corporativos
+      WHERE nome_original LIKE '%procuracao%'
       AND (${accessFilter})
     `;
 
@@ -271,6 +413,30 @@ const listarProcuracoes = async (req, res) => {
   } catch (error) {
     console.error("Erro na busca de procurações:", error);
     res.status(500).json({ error: "Erro interno" });
+  }
+};
+
+// Listar modelos de declaração armazenados em Documentos Corporativos
+const listarDeclaracoes = async (req, res) => {
+  try {
+    const accessFilter = req.accessFilter || "1=1";
+    const accessFilterValue = req.accessFilterValue !== undefined
+      ? req.accessFilterValue
+      : null;
+    const sql = `
+      SELECT id, nome_original, caminho_arquivo
+      FROM documentos_corporativos
+      WHERE nome_original LIKE '%declaracao%'
+      AND (${accessFilter})
+    `;
+    const params = accessFilterValue !== null ? [accessFilterValue] : [];
+    const [rows] = await pool.execute(sql, params);
+
+    console.log(`Declarações encontradas: ${rows.length} para o usuário ${accessFilterValue}`);
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("Erro na busca de declarações:", error);
+    return res.status(500).json({ error: "Erro interno" });
   }
 };
 
@@ -533,7 +699,9 @@ const processarWebhookZapsign = async (req, res) => {
 
 module.exports = {
   gerarProcuracao,
+  gerarDeclaracaoHipossuficiencia,
   listarProcuracoes,
+  listarDeclaracoes,
   downloadProcuracao,
   obterUrlZapsign,
   enviarParaZapsign,
