@@ -333,8 +333,8 @@ export default function BlogPage() {
           <div>
             <h3 className="text-white font-bold text-lg mb-4">Links Rápidos</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white transition-colors">Voltar ao inicio</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition-colors">Voltar ao inicio</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">Site</Link></li>
             </ul>
           </div>
           <div>
