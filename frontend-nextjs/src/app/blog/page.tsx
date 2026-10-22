@@ -56,7 +56,7 @@ export default function BlogPage() {
       }
     }
     getPosts();
-  }, []);
+  }, [errorAlert]);
   useEffect(() => {
     if (!searchTerm) {
       setFilteredPosts(posts);
