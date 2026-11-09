@@ -551,7 +551,7 @@ export default function SitePage() {
         {/* REDES SOCIAIS */}
         <div className="flex justify-center gap-4 py-8 bg-slate-100 lg:fixed lg:top-24 lg:left-6 lg:z-50 lg:flex-col lg:gap-3 lg:py-0 lg:bg-transparent">
           <a
-            href="https://www.instagram.com/mairadeoliveira_pcd"
+            href="https://www.instagram.com/assessoria.interagir?utm_source=ig_web_button_share_sheet&srtk=ZDNlZDc0MzIxNw=="
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"
